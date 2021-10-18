@@ -1,8 +1,8 @@
-package receipt
+package payment
 
 import "fmt"
 
-var allEntities = []Receipt{
+var AllEntities = []Receipt{
 	{ID: 1, Descr: "First purchase", Goods: map[string]uint64{"1-tool": 200, "2-tool": 150}},
 	{ID: 2, Descr: "Second purchase", Goods: map[string]uint64{"1-tool": 1000}},
 	{ID: 3, Descr: "Third purchase", Goods: map[string]uint64{"1-tool": 50, "2-tool": 111}},
@@ -14,6 +14,14 @@ type Receipt struct {
 	ID    uint64
 	Descr string
 	Goods map[string]uint64
+}
+
+func NewReceipt(ID uint64, Descr string, Goods map[string]uint64) *Receipt {
+	return &Receipt{
+		ID:    ID,
+		Descr: Descr,
+		Goods: Goods,
+	}
 }
 
 func (r *Receipt) String() string {
