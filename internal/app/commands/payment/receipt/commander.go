@@ -38,7 +38,7 @@ func (c *RCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPa
 	case "list":
 		c.CallbackList(callback, callbackPath)
 	default:
-		log.Printf("PaymentReceiptCommander.HandleCallback: unknown callback name: %s", callbackPath.CallbackName)
+		log.Printf("RCommander.HandleCallback: unknown callback name: %s", callbackPath.CallbackName)
 	}
 }
 
