@@ -6,7 +6,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (c *PaymentReceiptCommander) Help(inputMessage *tgbotapi.Message) {
+func (c *RCommander) Help(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
 		"/help__payment__receipt - help\n"+
 			"/list__payment__receipt - list products\n"+
@@ -18,6 +18,6 @@ func (c *PaymentReceiptCommander) Help(inputMessage *tgbotapi.Message) {
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PaymentReceiptCommander.Help: error sending reply message to chat - %v", err)
+		log.Printf("RCommander.Help: error sending reply message to chat - %v", err)
 	}
 }

@@ -9,21 +9,31 @@ import (
 	"github.com/ozonmp/omp-bot/internal/service/payment/receipt"
 )
 
-type PaymentReceiptCommander struct {
-	bot            *tgbotapi.BotAPI
-	receiptService *receipt.Service
+type ReceiptCommander interface {
+	Help(inputMsg *tgbotapi.Message)
+	Get(inputMsg *tgbotapi.Message)
+	List(inputMsg *tgbotapi.Message)
+	Delete(inputMsg *tgbotapi.Message)
+
+	New(inputMsg *tgbotapi.Message)  // return error not implemented
+	Edit(inputMsg *tgbotapi.Message) // return error not implemented
 }
 
-func NewPaymentReceiptCommander(bot *tgbotapi.BotAPI) *PaymentReceiptCommander {
-	receiptService := receipt.NewService()
+type RCommander struct {
+	bot            *tgbotapi.BotAPI
+	receiptService *receipt.DummyReceiptService
+}
 
-	return &PaymentReceiptCommander{
+func NewReceiptCommander(bot *tgbotapi.BotAPI) *RCommander {
+	receiptService := receipt.NewDummyReceiptService()
+
+	return &RCommander{
 		bot:            bot,
 		receiptService: receiptService,
 	}
 }
 
-func (c *PaymentReceiptCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+func (c *RCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 	switch callbackPath.CallbackName {
 	case "list":
 		c.CallbackList(callback, callbackPath)
@@ -32,7 +42,7 @@ func (c *PaymentReceiptCommander) HandleCallback(callback *tgbotapi.CallbackQuer
 	}
 }
 
-func (c *PaymentReceiptCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
+func (c *RCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
 	switch commandPath.CommandName {
 	case "help":
 		c.Help(msg)
@@ -40,6 +50,12 @@ func (c *PaymentReceiptCommander) HandleCommand(msg *tgbotapi.Message, commandPa
 		c.List(msg)
 	case "get":
 		c.Get(msg)
+	case "delete":
+		c.Delete(msg)
+	case "edit":
+		c.Edit(msg)
+	case "new":
+		c.New(msg)
 	default:
 		c.Default(msg)
 	}

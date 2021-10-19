@@ -8,6 +8,7 @@ var AllEntities = []Receipt{
 	{ID: 3, Descr: "Third purchase", Goods: map[string]uint64{"1-tool": 50, "2-tool": 111}},
 	{ID: 4, Descr: "Fourth purchase", Goods: map[string]uint64{"1-tool": 200}},
 	{ID: 5, Descr: "Fifth purchase", Goods: map[string]uint64{"1-tool": 547, "2-tool": 286}},
+	{ID: 6, Descr: "Sixth purchase", Goods: map[string]uint64{"1-tool": 2317, "2-tool": 23286}},
 }
 
 type Receipt struct {

@@ -24,7 +24,7 @@ func NewPaymentCommander(
 	return &PaymentCommander{
 		bot: bot,
 		// subdomainCommander
-		receiptCommander: receipt.NewPaymentReceiptCommander(bot),
+		receiptCommander: receipt.NewReceiptCommander(bot),
 	}
 }
 

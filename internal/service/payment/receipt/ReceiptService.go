@@ -2,6 +2,7 @@ package receipt
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/ozonmp/omp-bot/internal/model/payment"
 )
@@ -34,7 +35,7 @@ func (d *DummyReceiptService) List(
 	start := end - limit
 	lenght := uint64(len(payment.AllEntities))
 	if end > lenght {
-		if start > lenght {
+		if start >= lenght {
 			return payment.AllEntities[:], fmt.Errorf("there is no enought elements")
 		} else {
 			return payment.AllEntities[start:], nil
@@ -47,8 +48,7 @@ func (d *DummyReceiptService) List(
 
 func (d *DummyReceiptService) Create(
 	newReceipt payment.Receipt) (uint64, error) {
-	last := payment.AllEntities[len(payment.AllEntities)-1]
-	if newReceipt.ID <= last.ID {
+	if d.Contains(newReceipt.ID) {
 		return 0,
 			fmt.Errorf("cannot create new receipt with such ID: %d", newReceipt.ID)
 	}
@@ -59,13 +59,14 @@ func (d *DummyReceiptService) Create(
 func (d *DummyReceiptService) Update(
 	receiptID uint64,
 	receipt payment.Receipt) error {
-	for i, valud := range payment.AllEntities {
-		if valud.ID == receiptID {
+	for i, value := range payment.AllEntities {
+		if value.ID == receiptID &&
+			(value.ID == receipt.ID || !d.Contains(receipt.ID)) {
 			payment.AllEntities[i] = receipt
 			return nil
 		}
 	}
-	return fmt.Errorf("there is no receipt with such ID: %d", receiptID)
+	return fmt.Errorf("there is no receipt with such ID: %d or ID alredy exist", receiptID)
 }
 
 func (d *DummyReceiptService) Remove(receiptID uint64) (bool, error) {
@@ -84,4 +85,26 @@ func (d *DummyReceiptService) Remove(receiptID uint64) (bool, error) {
 
 func NewDummyReceiptService() *DummyReceiptService {
 	return &DummyReceiptService{}
+}
+
+func (d *DummyReceiptService) Len() uint64 {
+	return uint64(len(payment.AllEntities))
+}
+
+func (d *DummyReceiptService) AvailIndex() []uint64 {
+	var indexes []uint64
+	for _, value := range payment.AllEntities {
+		indexes = append(indexes, value.ID)
+	}
+	sort.Slice(indexes, func(i, j int) bool { return indexes[i] < indexes[j] })
+	return indexes
+}
+
+func (d *DummyReceiptService) Contains(idx uint64) bool {
+	for _, value := range payment.AllEntities {
+		if value.ID == idx {
+			return true
+		}
+	}
+	return false
 }
