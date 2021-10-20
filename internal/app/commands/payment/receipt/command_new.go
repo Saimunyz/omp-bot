@@ -22,8 +22,8 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 			fmt.Sprintf("You have to write an index not from %v\n"+
 				" and data in json format:\n"+
 				"{\"ID\": <new id>,\n"+
-				"\"Descr\": \"<some description text>}\n"+
-				"\"Goods\": {\"<tool>\":<price>},\n"+
+				"\"Descr\": \"<some description text>\"\n"+
+				"\"Goods\": {\"<tool>\": <price>}}\n"+
 				"ALL ARGUMENTS ARE NOT REQUIRED AND"+
 				"ID SETS ON MAX IF IT UNSET", indexes),
 		)
@@ -46,8 +46,8 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 			fmt.Sprintf("You have to write an index not from %v\n"+
 				" and data in json format:\n"+
 				"{\"ID\": <new id>,\n"+
-				"\"Descr\": \"<some description text>}\n"+
-				"\"Goods\": {\"<tool>\":<price>},\n"+
+				"\"Descr\": \"<some description text>}\"\n"+
+				"\"Goods\": {\"<tool>\": <price>}}\n"+
 				"ALL ARGUMENTS ARE NOT REQUIRED", indexes),
 		)
 		_, _ = c.bot.Send(msg)
