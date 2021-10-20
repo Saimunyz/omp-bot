@@ -72,7 +72,7 @@ func (c *RCommander) Edit(inputMsg *tgbotapi.Message) {
 
 		msg := tgbotapi.NewMessage(
 			inputMsg.Chat.ID,
-			fmt.Sprintf("Successeful updeted idx %d", idx),
+			fmt.Sprintf("Successful updeted idx %d", idx),
 		)
 		_, _ = c.bot.Send(msg)
 

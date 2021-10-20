@@ -33,7 +33,12 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 
 	indexes := c.receiptService.AvailIndex()
 	if receipt.ID == 0 {
-		receipt.ID = indexes[len(indexes)-1] + 1
+		idxLen := len(indexes)
+		if idxLen != 0 {
+			receipt.ID = indexes[idxLen-1] + 1
+		} else {
+			receipt.ID = 0
+		}
 	}
 
 	idx, err := c.receiptService.Create(receipt)
@@ -58,7 +63,7 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 
 	msg := tgbotapi.NewMessage(
 		inputMsg.Chat.ID,
-		"Successeful createt new receipt\n"+
+		"Successful createt new receipt\n"+
 			newReceipt.String(),
 	)
 	_, _ = c.bot.Send(msg)

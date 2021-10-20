@@ -45,7 +45,7 @@ func (c *RCommander) Delete(inputMsg *tgbotapi.Message) {
 		if res {
 			msg := tgbotapi.NewMessage(
 				inputMsg.Chat.ID,
-				fmt.Sprintf("Successeful deleted idx %d", idx),
+				fmt.Sprintf("Successful deleted idx %d", idx),
 			)
 			_, _ = c.bot.Send(msg)
 		}
