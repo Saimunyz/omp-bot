@@ -1,7 +1,6 @@
 package receipt
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -13,29 +12,15 @@ func (c *RCommander) Get(inputMessage *tgbotapi.Message) {
 
 	idx, err := strconv.Atoi(args)
 	if err != nil {
-		log.Println("wrong args", args)
-
-		indexes := c.receiptService.AvailIndex()
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			fmt.Sprintf("You have to write an index from %v", indexes),
-		)
-
-		_, _ = c.bot.Send(msg)
+		log.Printf("wrong args: %v", args)
+		c.DisplayError(inputMessage, wrongIndex)
 		return
 	}
 
 	receipt, err := c.receiptService.Describe(uint64(idx))
 	if err != nil {
 		log.Printf("fail to get receipt with idx %d: %v", idx, err)
-
-		indexes := c.receiptService.AvailIndex()
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			fmt.Sprintf("You have to write an index from %v", indexes),
-		)
-		_, _ = c.bot.Send(msg)
-
+		c.DisplayError(inputMessage, wrongIndex)
 		return
 	}
 
@@ -47,5 +32,7 @@ func (c *RCommander) Get(inputMessage *tgbotapi.Message) {
 	_, err = c.bot.Send(msg)
 	if err != nil {
 		log.Printf("RCommander.Get: error sending reply message to chat - %v", err)
+		c.DisplayError(inputMessage, defaultErr)
+		return
 	}
 }

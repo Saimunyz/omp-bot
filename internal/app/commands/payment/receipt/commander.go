@@ -1,7 +1,9 @@
 package receipt
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ozonmp/omp-bot/internal/app/path"
 
@@ -42,21 +44,78 @@ func (c *RCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPa
 	}
 }
 
+type CustomErr uint8
+
+const (
+	help   = "help"
+	list   = "list"
+	get    = "get"
+	delete = "delete"
+	edit   = "edit"
+	new    = "new"
+
+	defaultErr CustomErr = iota
+	jsonNewErr
+	jsonEditErr
+	emptySliceErr
+	wrongIndex
+)
+
 func (c *RCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
 	switch commandPath.CommandName {
-	case "help":
+	case help:
 		c.Help(msg)
-	case "list":
+	case list:
 		c.List(msg)
-	case "get":
+	case get:
 		c.Get(msg)
-	case "delete":
+	case delete:
 		c.Delete(msg)
-	case "edit":
+	case edit:
 		c.Edit(msg)
-	case "new":
+	case new:
 		c.New(msg)
 	default:
 		c.Default(msg)
 	}
+}
+
+func (c *RCommander) DisplayError(inputMsg *tgbotapi.Message, typeErr CustomErr) {
+
+	indexes := c.receiptService.AvailIndex()
+	msgErr := strings.Builder{}
+
+	switch typeErr {
+	case defaultErr:
+		msgErr.WriteString("Error: somethig bad happend, Sorry!\n")
+		msgErr.WriteString("Try again or come back later")
+	case jsonNewErr:
+		msgErr.WriteString("You have to write an index not from")
+		msgErr.WriteString(fmt.Sprintf(" %v\n", indexes))
+		msgErr.WriteString("and data in json format:\n")
+		msgErr.WriteString("{\"ID\": <new id>,\n")
+		msgErr.WriteString("\"Descr\": \"<some description text>\"\n")
+		msgErr.WriteString("\"Goods\": {\"<tool>\": <price>}}\n")
+		msgErr.WriteString("ALL ARGUMENTS ARE NOT REQUIRED AND")
+		msgErr.WriteString(" ID IS SET ON MAX IF IT IS NOT SET")
+	case jsonEditErr:
+		msgErr.WriteString("You have to write an index from")
+		msgErr.WriteString(fmt.Sprintf(" %v\n", indexes))
+		msgErr.WriteString("and data in json format:\n")
+		msgErr.WriteString("{\"ID\": <new id>,\n")
+		msgErr.WriteString("\"Descr\": \"<some description text>\"\n")
+		msgErr.WriteString("\"Goods\": {\"<tool>\": <price>}}\n")
+		msgErr.WriteString("ALL ARGUMENTS ARE NOT REQUIRED")
+	case emptySliceErr:
+		msgErr.WriteString("There is no any existed receipt yet")
+	case wrongIndex:
+		msgErr.WriteString("You have to write an index from ")
+		msgErr.WriteString(fmt.Sprintf("%v", indexes))
+	}
+
+	msg := tgbotapi.NewMessage(
+		inputMsg.Chat.ID,
+		msgErr.String(),
+	)
+	_, _ = c.bot.Send(msg)
 }

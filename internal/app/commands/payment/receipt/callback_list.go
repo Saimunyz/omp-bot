@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/app/path"
@@ -18,24 +19,24 @@ func (c *RCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath
 	parsedData := CallbackListData{}
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &parsedData)
 	if err != nil {
-		log.Printf("RCommander.CallbackList: "+
-			"error reading json data for type CallbackListData from "+
-			"input string %v - %v", callbackPath.CallbackData, err)
+		log.Printf("RCommander.CallbackList: %v", err)
+		c.DisplayError(callback.Message, defaultErr)
 		return
 	}
 
 	receipts, _ := c.receiptService.List(parsedData.CurrPage, parsedData.ReceiptsPerPage)
-	var outputMsgText string
+
+	outputMsgText := strings.Builder{}
 
 	for _, p := range receipts {
-		outputMsgText += p.String()
-		outputMsgText += fmt.Sprintf("\n%20s\n", "----------------------------")
+		outputMsgText.WriteString(p.String())
+		outputMsgText.WriteString(fmt.Sprintf("\n%20s\n", "----------------------------"))
 	}
 
 	msg := tgbotapi.NewEditMessageText(
 		callback.Message.Chat.ID,
 		callback.Message.MessageID,
-		outputMsgText,
+		outputMsgText.String(),
 	)
 
 	buttons := keybord(CallbackListData{
@@ -55,5 +56,7 @@ func (c *RCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath
 	_, err = c.bot.Send(msg)
 	if err != nil {
 		log.Printf("RCommander.CallbackList: error sending reply message to chat - %v", err)
+		c.DisplayError(callback.Message, defaultErr)
+		return
 	}
 }

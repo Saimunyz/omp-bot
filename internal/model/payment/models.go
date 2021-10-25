@@ -1,6 +1,9 @@
 package payment
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var AllEntities = []Receipt{
 	{ID: 1, Descr: "First purchase", Goods: map[string]uint64{"1-tool": 200, "2-tool": 150}},
@@ -28,17 +31,16 @@ func NewReceipt(ID uint64, Descr string, Goods map[string]uint64) *Receipt {
 func (r *Receipt) String() string {
 	var totalSum uint64
 
-	res := fmt.Sprintf("%9sYour receipt\n", " ")
-	res += fmt.Sprintf("%15sId:%1d\n\n", " ", r.ID)
+	res := strings.Builder{}
+	res.WriteString(fmt.Sprintf("%9sYour receipt\n", " "))
+	res.WriteString(fmt.Sprintf("%15sId:%1d\n\n", " ", r.ID))
 
 	for key, value := range r.Goods {
-		res += fmt.Sprintf("%10s:%10d\n", key, value)
+		res.WriteString(fmt.Sprintf("%10s:%10d\n", key, value))
 		totalSum += value
 	}
-	res += "\n"
-	res += fmt.Sprintf("%5sTotal:%10d\n", " ", totalSum)
-	res += "\n"
-	res += fmt.Sprintf("%20s\n", r.Descr)
+	res.WriteString(fmt.Sprintf("\n%5sTotal:%10d\n", " ", totalSum))
+	res.WriteString(fmt.Sprintf("\n%20s\n", r.Descr))
 
-	return res
+	return res.String()
 }

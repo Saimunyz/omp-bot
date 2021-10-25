@@ -1,7 +1,7 @@
 package receipt
 
 import (
-	"fmt"
+	"errors"
 	"sort"
 
 	"github.com/ozonmp/omp-bot/internal/model/payment"
@@ -17,6 +17,13 @@ type ReceiptService interface {
 
 type DummyReceiptService struct{}
 
+var (
+	ErrNotEnougthElem = errors.New("not enought elements")
+	ErrWrongID        = errors.New("there is no receipt with such ID")
+	ErrIdIsUsed       = errors.New("this ID is already used")
+	ErrWrongIdOrUsed  = errors.New("there is no receipt with such ID: %d or ID alredy exist")
+)
+
 func (d *DummyReceiptService) Describe(
 	receiptID uint64) (*payment.Receipt, error) {
 	for _, value := range payment.AllEntities {
@@ -24,7 +31,7 @@ func (d *DummyReceiptService) Describe(
 			return &value, nil
 		}
 	}
-	return nil, fmt.Errorf("there is no receipt with such ID: %d", receiptID)
+	return nil, ErrWrongID
 }
 
 func (d *DummyReceiptService) List(
@@ -35,7 +42,7 @@ func (d *DummyReceiptService) List(
 	lenght := d.Len()
 	if end > lenght {
 		if start >= lenght {
-			return payment.AllEntities[:], fmt.Errorf("there is no enought elements")
+			return payment.AllEntities[:], ErrNotEnougthElem
 		} else {
 			return payment.AllEntities[start:], nil
 		}
@@ -48,8 +55,7 @@ func (d *DummyReceiptService) List(
 func (d *DummyReceiptService) Create(
 	newReceipt payment.Receipt) (uint64, error) {
 	if d.Contains(newReceipt.ID) {
-		return 0,
-			fmt.Errorf("cannot create new receipt with such ID: %d", newReceipt.ID)
+		return 0, ErrWrongID
 	}
 	payment.AllEntities = append(payment.AllEntities, newReceipt)
 	return newReceipt.ID, nil
@@ -65,21 +71,17 @@ func (d *DummyReceiptService) Update(
 			return nil
 		}
 	}
-	return fmt.Errorf("there is no receipt with such ID: %d or ID alredy exist", receiptID)
+	return ErrWrongIdOrUsed
 }
 
 func (d *DummyReceiptService) Remove(receiptID uint64) (bool, error) {
-	for i, valud := range payment.AllEntities {
-		if valud.ID == receiptID {
-			if i == len(payment.AllEntities)-1 {
-				payment.AllEntities = payment.AllEntities[:i]
-			} else {
-				payment.AllEntities = append(payment.AllEntities[:i], payment.AllEntities[i+1:]...)
-			}
+	for i, value := range payment.AllEntities {
+		if value.ID == receiptID {
+			payment.AllEntities = append(payment.AllEntities[:i], payment.AllEntities[i+1:]...)
 			return true, nil
 		}
 	}
-	return false, fmt.Errorf("there is no receipt with such ID: %d", receiptID)
+	return false, ErrWrongID
 }
 
 func NewDummyReceiptService() *DummyReceiptService {

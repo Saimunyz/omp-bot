@@ -16,18 +16,8 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 	//{"ID":1,"Descr":"First purchase","Goods":{"1-tool":200,"2-tool":150}}
 	err := json.Unmarshal([]byte(args), &receipt)
 	if err != nil {
-		indexes := c.receiptService.AvailIndex()
-		msg := tgbotapi.NewMessage(
-			inputMsg.Chat.ID,
-			fmt.Sprintf("You have to write an index not from %v\n"+
-				" and data in json format:\n"+
-				"{\"ID\": <new id>,\n"+
-				"\"Descr\": \"<some description text>\"\n"+
-				"\"Goods\": {\"<tool>\": <price>}}\n"+
-				"ALL ARGUMENTS ARE NOT REQUIRED AND"+
-				"ID SETS ON MAX IF IT UNSET", indexes),
-		)
-		_, _ = c.bot.Send(msg)
+		log.Printf("RCommander.New: %v", err)
+		c.DisplayError(inputMsg, jsonNewErr)
 		return
 	}
 
@@ -43,19 +33,8 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 
 	idx, err := c.receiptService.Create(receipt)
 	if err != nil {
-		log.Println("Cannot create new receipt", args)
-
-		indexes := c.receiptService.AvailIndex()
-		msg := tgbotapi.NewMessage(
-			inputMsg.Chat.ID,
-			fmt.Sprintf("You have to write an index not from %v\n"+
-				" and data in json format:\n"+
-				"{\"ID\": <new id>,\n"+
-				"\"Descr\": \"<some description text>}\"\n"+
-				"\"Goods\": {\"<tool>\": <price>}}\n"+
-				"ALL ARGUMENTS ARE NOT REQUIRED", indexes),
-		)
-		_, _ = c.bot.Send(msg)
+		log.Printf("Cannot create new receipt: %v", receipt)
+		c.DisplayError(inputMsg, jsonNewErr)
 		return
 	}
 
@@ -63,8 +42,13 @@ func (c *RCommander) New(inputMsg *tgbotapi.Message) {
 
 	msg := tgbotapi.NewMessage(
 		inputMsg.Chat.ID,
-		"Successful createt new receipt\n"+
-			newReceipt.String(),
+		fmt.Sprintf("Successful createt new receipt\n%s",
+			newReceipt.String()),
 	)
-	_, _ = c.bot.Send(msg)
+	_, err = c.bot.Send(msg)
+	if err != nil {
+		log.Printf("RCommander.New: error sending reply message to chat - %v", err)
+		c.DisplayError(inputMsg, defaultErr)
+		return
+	}
 }
